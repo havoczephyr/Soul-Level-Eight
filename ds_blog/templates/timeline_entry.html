@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block head %}{{ title }}!{% endblock %}
+{% block content %}
+    <article class="media content-section">
+        <div class="media-body">
+          <div class="article-metadata">
+            <p class="mr-2" href="#">{{ entry.character_name }}</p>
+            <p class="article_content">Date Posted: {{ entry.date_posted.strftime('%Y-%m-%d') }}</p>
+            <p class="article_content">SL: {{ entry.soul_level }} + {{ delta_entry.sl_delta }}</p>
+            <p class="article_content">Play Time: {{ entry.play_time }} + {{ delta_entry.playtime_delta }}</p>
+            <p class="article_content">VIT: {{ entry.vitality }}</p>
+            <p class="article_content">ATN: {{ entry.attunement }}</p>
+            <p class="article_content">END: {{ entry.endurance }}</p>
+            <p class="article_content">STR: {{ entry.strength }}</p>
+            <p class="article_content">DEX: {{ entry.dexterity }}</p>
+            <p class="article_content">RES: {{ entry.resistance }}</p>
+            <p class="article_content">INT: {{ entry.intelligence }}</p>
+            <p class="article_content">FTH: {{ entry.faith }}</p>
+            <p class="article_content">Last Bonfire: {{ entry.last_bonfire }}</p>
+            <p class="article_content">Total Deaths: {{ entry.total_deaths }} + {{ delta_entry.death_delta }}</p>
+            <p class="article_content">New Game: {{ entry.journey_cycle }}</p>
+            <p class="article_content">Max HP: {{ entry.max_HP }}</p>
+            <p class="article_content">Max Stamina: {{ entry.max_stamina }}</p>
+            <p class="article_content">Soft Humanities: {{ entry.soft_humanity }}</p>
+            <p class="article_content">Primary Left Weapon: {{ entry.primary_left_weapon }}</p>
+            <p class="article_content">Primary Right Weapon: {{ entry.primary_right_weapon }}</p>
+            <p class="article_content">Secondary Left Weapon: {{ entry.secondary_left_weapon }}</p>
+            <p class="article_content">Secondary Right Weapon: {{ entry.secondary_right_weapon }}</p>
+            <p class="article_content">Helmet: {{ entry.helmet }}</p>
+            <p class="article_content">Armor: {{ entry.armor }}</p>
+            <p class="article_content">Gauntlets: {{ entry.gauntlet }}</p>
+            <p class="article_content">Leggings: {{ entry.leggings }}</p>
+          </div>
+        </div>
+      </article>
+{% endblock %}

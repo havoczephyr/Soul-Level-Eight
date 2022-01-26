@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block head %}{{ title }}!{% endblock %}
+{% block content %}
+<div class="content-section">
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4">New Timeline Entry</legend>
+            <div class="form-group">
+                {{ form.character_name.label(class="form-control-label") }}
+                {% if form.character_name.errors %}
+                    {{ form.character_name(class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.character_name.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.character_name(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.slash_data.label(class="form-control-label") }}
+                {% if form.slash_data.errors %}
+                    {{ form.slash_data(class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.slash_data.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                                     </div>
+                {% else %}
+                    {{ form.slash_data(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.player_game_data.label(class="form-control-label") }}
+                {% if form.player_game_data.errors %}
+                    {{ form.player_game_data(class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.player_game_data.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.player_game_data(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.attributes.label(class="form-control-label") }}
+                {% if form.attributes.errors %}
+                    {{ form.attributes(class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.attributes.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.attributes(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.char_equip.label(class="form-control-label") }}
+                {% if form.char_equip.errors %}
+                    {{ form.char_equip(class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.char_equip.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.char_equip(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.base_stats.label(class="form-control-label") }}
+                {% if form.base_stats.errors %}
+                    {{ form.base_stats(class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.base_stats.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.base_stats(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+        </fieldset>
+        <div class="form-group">
+            {{ form.submit(class="btn btn-outline-info") }}
+        </div>
+    </form>
+</div>
+{% endblock %}
