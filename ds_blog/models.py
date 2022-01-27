@@ -22,6 +22,7 @@ class User(db.Model, UserMixin):
 class TimelineEntry(db.Model):
     __tablename__='timeline_entry'
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     character_name = db.Column(db.String, nullable=False)
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     soul_level = db.Column(db.Integer, nullable=False)
