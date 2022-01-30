@@ -2,6 +2,7 @@
 
 {% block head %}{{ title }}!{% endblock %}
 {% block content %}
+{% if announcer %}
 <div class="content-section">
     <form method="POST" action="">
         {{ form.hidden_tag() }}
@@ -39,4 +40,7 @@
         </div>
     </form>
 </div>
+{% else %}
+<p>You were trying to cross the border!</p>
+{% endif %}
 {% endblock %}

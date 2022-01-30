@@ -2,5 +2,20 @@
 
 {% block head %}{{ title }}!{% endblock %}
 {% block content %}
-    <h1> It's a Home Page! </h1>
+    <h1> Welcome to the Soul Level Eight Dark Souls Blog! </h1>
+
+    {% for post in announcements %}
+        <article class="media content-section">
+          <img class="rounded-circle article-img" src="{{ url_for('static', filename='profile_pics/' + post.author.image_file) }}">
+          <div class="media-body">
+            <div class="article-metadata">
+              <p class='mr-2'>{{ post.author.username }}</p>
+              <small class="text-muted">{{ post.date_posted.strftime('%Y-%m-%d') }}</small>
+            </div>
+            <h2>{{ post.title }}</h2>
+            <p class="article-content">{{ post.content }}</p>
+          </div>
+        </article>
+    {% endfor %}
+</div>
 {% endblock %}

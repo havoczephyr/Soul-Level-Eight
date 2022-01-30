@@ -1,3 +1,5 @@
 env
 development
+/ds_blog/__pycache__
 /ds_blog/site.db
+/ds_blog/static/lordran_bonfires

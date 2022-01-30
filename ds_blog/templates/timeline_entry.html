@@ -31,6 +31,7 @@
             <p class="article_content">Armor: {{ entry.armor }}</p>
             <p class="article_content">Gauntlets: {{ entry.gauntlet }}</p>
             <p class="article_content">Leggings: {{ entry.leggings }}</p>
+            <img src= "{{ url_for('static', filename='lordran_bonfires/'+ entry.last_bonfire +'.png')  }}">
           </div>
         </div>
       </article>

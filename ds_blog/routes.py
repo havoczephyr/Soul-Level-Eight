@@ -2,7 +2,7 @@ from random import choice
 import secrets
 import os
 from PIL import Image
-from ds_blog import app, bcrypt, db
+from ds_blog import app, bcrypt, db, login_manager
 from ds_blog.models import User, TimelineDelta, TimelineEntry, Announcements, Comments, BonfireLocation, add_new_td
 from ds_blog.forms import LoginForm, RegistrationForm, TimelineEntryForm, AnnouncementsForm, CommentForm, UpdateAccountForm
 from ds_blog.dictionary import bonfire_locations, weapon_dict, armor_dict
@@ -16,16 +16,34 @@ from flask_login.utils import login_user, current_user, logout_user, login_requi
 
 random_gestures = ['Umbasa', 'Vereror Nox', 'See You, Space Cowboy', 'Easy Come, Easy Go', 'See you, Space Samurai', 'See you, Cowgirl, Someday, Somewhere', "You're gonna carry that weight", "Soul of the mind, key to lifes' ether. Soul of the lost, withdrawn from its vessel. Let strength be granted, so the world might be mended... so the world might be mended.", "Let these souls, withdrawn from their vesels, Manifestations of disparity, Elucidated by fire, Burrow deep within me, Retreating to a darkness beyond the reach of flame, Let them assume a new master, Inhabiting ash, casting themselves upon new forms."]
 
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
 @app.route('/')
 @app.route('/home')
 def home():
     gesture = choice(random_gestures)
-    return render_template('home.html', title='Home Page', gesture=gesture)
+    announcements = Announcements.query.all()
+    return render_template('home.html', title='Home Page', gesture=gesture, announcements=announcements)
+
+@app.route('/post-an', methods=['GET', 'POST'])
+@login_required
+def new_post():
+    form = AnnouncementsForm()
+    if form.validate_on_submit():
+        announcement = Announcements(title=form.title.data, content=form.content.data, author=current_user)
+        db.session.add(announcement)
+        db.session.commit()
+        flash('Your post has been created!', 'success')
+        return redirect(url_for('home'))
+    return render_template('post_announcement.html', title='New Annoucement', form=form, legend ='New Announcement', announcer=current_user.announcer)
 
 @app.route('/timeline')
 def timeline():
     gesture = choice(random_gestures)
-    return render_template('timeline.html', title='Timeline', gesture=gesture)
+    timeline_entry = TimelineEntry.query.all()
+    return render_template('timeline.html', title='Timeline', gesture=gesture, timeline_entry=timeline_entry)
 
 @app.route('/timeline_entry/<int:tl_id>', methods=['GET', 'POST'])
 def view_timeline_entry(tl_id):
@@ -35,7 +53,7 @@ def view_timeline_entry(tl_id):
     return render_template('timeline_entry.html', title='Timeline Entry', entry=entry, delta_entry=delta_entry, gesture=gesture)
 
 @login_required
-@app.route('/post_tl', methods=['GET', 'POST'])
+@app.route('/post-tl', methods=['GET', 'POST'])
 def timeline_entry():
     form = TimelineEntryForm()
     if form.validate_on_submit():
@@ -79,8 +97,10 @@ def timeline_entry():
         max_HP = int(bs_index[1].get('LastState').get('@Value'))
         max_stamina = int(bs_index[5].get('LastState').get('@Value'))
         soft_humanity = int(bs_index[6].get('LastState').get('@Value'))
+        add_new_td(character_name, total_deaths, soul_level, play_time)
         timeline_entry = TimelineEntry(
             character_name=character_name,
+            author=current_user,
             soul_level=soul_level,
             vitality=vitality,
             attunement=attunement,
@@ -106,14 +126,13 @@ def timeline_entry():
             leggings=leggings,
             play_time=play_time
         )
-        add_new_td(character_name, total_deaths, soul_level, play_time)
         #before I commit timeline_entry, I need to perform timeline_delta's entry so that first() pulls the latest entry from the db. THEN perform tiemline entry's new entry.
         db.session.add(timeline_entry)
         db.session.commit()
         flash('Timeline Entry has been created!', 'success')
         return redirect(url_for('timeline'))
     gesture = choice(random_gestures)
-    return render_template('post_timeline_entry.html', form=form, gesture=gesture)
+    return render_template('post_timeline_entry.html', form=form, gesture=gesture, developer=current_user.developer)
 
 
 def save_picture(form_picture):

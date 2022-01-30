@@ -2,5 +2,18 @@
 
 {% block head %}{{ title }}!{% endblock %}
 {% block content %}
-  <p>Work In Poggers</p>
+{% for entry in timeline_entry %}
+<article class="media content-section">
+  <div class="media-body">
+    <div class="article-metadata">
+      <a class="mr-2" href="{{ url_for('view_timeline_entry', tl_id=entry.id)  }}">Entry #{{ entry.id }}</a>
+      <small class="text-muted">{{ entry.date_posted.strftime('%Y-%m-%d') }}</small>
+    </div>
+    <p class="article-content">Character Name: {{ entry.character_name }}</p>
+    <p class="article-content">Soul Level: {{ entry.soul_level }}</p>
+    <p class="article-content">Total Deaths: {{ entry.total_deaths }}</p>
+    <p class="article-content">Play Time: {{ entry.play_time }}</p>
+  </div>
+</article>
+{% endfor %}
 {% endblock %}

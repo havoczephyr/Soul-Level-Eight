@@ -1,20 +1,18 @@
 from datetime import date, datetime
-from ds_blog import db, login_manager
+from ds_blog import db
 from flask_login import UserMixin
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
 
 class User(db.Model, UserMixin):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
     developer = db.Column(db.Boolean, nullable=False, default=False)
-    # announcer = db.Column(db.Boolean, nullable=False, default=False)
+    announcer = db.Column(db.Boolean, nullable=False, default=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     image_file = db.Column(db.String(20), nullable=False, default='default.png')
     password = db.Column(db.String(60), nullable=False)
+    announcements = db.relationship('Announcements', backref='author', lazy=True)
+    timeline_entries = db.relationship('TimelineEntry', backref='author', lazy=True)
     
     def __repr__(self):
         return f"User('{self.username}', '{self.email}', '{self.image_file}')"
@@ -73,8 +71,11 @@ def add_new_td(character_name, total_deaths, soul_level, play_time):
     latest_data = TimelineEntry.query.order_by(TimelineEntry.id.desc()).first()
     try:
         last_state_deaths = int(data.total_deaths)
+        print(f"last state deaths: {last_state_deaths}")
         last_state_sl = int(data.soul_level)
+        print(f"last_state_sl: {last_state_sl}")
         last_state_pt = int(data.play_time)
+        print(f"last_state_pt: {last_state_pt}")
     except AttributeError:
         print("couldn't pull data")
         last_state_deaths = 0
@@ -88,8 +89,11 @@ def add_new_td(character_name, total_deaths, soul_level, play_time):
 
     tl_entry_id = last_entry_id + 1
     death_delta = total_deaths - last_state_deaths
+    print(f'Death Delta {total_deaths} - {last_state_deaths} = {death_delta}')
     sl_delta = soul_level - last_state_sl
+    print(f'SL Delta = {soul_level} - {last_state_sl} = {sl_delta}')
     playtime_delta = play_time - last_state_pt
+    print(f"Play Time Delta= {play_time} - {last_state_pt} = {playtime_delta}")
 
     timeline_delta = TimelineDelta(
         tl_entry_id=tl_entry_id,
