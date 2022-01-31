@@ -3,8 +3,9 @@ import secrets
 import os
 from PIL import Image
 from ds_blog import app, bcrypt, db, login_manager
-from ds_blog.models import User, TimelineDelta, TimelineEntry, Announcements, Comments, BonfireLocation, add_new_td
-from ds_blog.forms import LoginForm, RegistrationForm, TimelineEntryForm, AnnouncementsForm, CommentForm, UpdateAccountForm
+from ds_blog.models import(User, TimelineDelta, TimelineEntry, 
+                        Announcements, add_new_td, td_graph_gen)
+from ds_blog.forms import LoginForm, RegistrationForm, TimelineEntryForm, AnnouncementsForm, UpdateAccountForm
 from ds_blog.dictionary import bonfire_locations, weapon_dict, armor_dict
 from flask import render_template, url_for, flash, redirect, request
 
@@ -42,11 +43,19 @@ def new_post():
 @app.route('/timeline')
 def timeline():
     gesture = choice(random_gestures)
-    timeline_entry = TimelineEntry.query.all()
+    timeline_entry = TimelineEntry.query.order_by(TimelineEntry.id.desc()).all()
     return render_template('timeline.html', title='Timeline', gesture=gesture, timeline_entry=timeline_entry)
 
 @app.route('/timeline_entry/<int:tl_id>', methods=['GET', 'POST'])
 def view_timeline_entry(tl_id):
+    """[summary]
+
+    Args:
+        tl_id ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
     entry = TimelineEntry.query.get_or_404(tl_id)
     delta_entry = TimelineDelta.query.filter_by(tl_entry_id=tl_id).first()
     gesture = choice(random_gestures)
@@ -129,6 +138,9 @@ def timeline_entry():
         #before I commit timeline_entry, I need to perform timeline_delta's entry so that first() pulls the latest entry from the db. THEN perform tiemline entry's new entry.
         db.session.add(timeline_entry)
         db.session.commit()
+        latest = TimelineEntry.query.filter_by(character_name=character_name).order_by(TimelineEntry.id.desc()).first()
+        id = latest.id
+        td_graph_gen(character_name, id)
         flash('Timeline Entry has been created!', 'success')
         return redirect(url_for('timeline'))
     gesture = choice(random_gestures)

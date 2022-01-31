@@ -1,6 +1,7 @@
 from datetime import date, datetime
 from ds_blog import db
 from flask_login import UserMixin
+import matplotlib.pyplot as plt
 
 class User(db.Model, UserMixin):
     __tablename__ = 'user'
@@ -50,6 +51,26 @@ class TimelineEntry(db.Model):
 
     def __repr__(self):
         return f"TimelineEntry('{self.last_bonfire}', '{self.date_posted}', '{self.character_name}')"
+
+def td_graph_gen(character_name, id):
+    td_plot = []
+    entry = TimelineEntry.query.filter_by(character_name=character_name)
+    entry_len = 0
+    for i in entry:
+        td_plot.append(i.total_deaths)
+        entry_len = entry_len + 1
+    x = list(range(1,(entry_len + 1)))
+    y = td_plot
+    plt.fill_between(x, y, color='skyblue', alpha=0.8)
+    plt.plot(x, y, color='skyblue')
+    plt.xlabel('Timeline Entries')
+    plt.ylabel('Deaths Over Time')
+    plt.savefig(f'ds_blog/static/td_graphs/{id}.jpg')
+    
+
+    # _, f_ext = os.path.splitext(form_picture.filename)
+    # picture_fn = random_hex + f_ext
+    # picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
 
 class TimelineDelta(db.Model):
     id = db.Column(db.Integer, primary_key=True)
