@@ -32,7 +32,10 @@
             <p class="article_content">Gauntlets: {{ entry.gauntlet }}</p>
             <p class="article_content">Leggings: {{ entry.leggings }}</p>
             <img src= "{{ url_for('static', filename='lordran_bonfires/'+ entry.last_bonfire +'.png')  }}">
+            
           </div>
+          <p class="mr-2" href="#">Graphs</p>
+          <img src= "{{ url_for('static', filename='td_graphs/' + entry_id +'.jpg') }}">
         </div>
       </article>
 {% endblock %}

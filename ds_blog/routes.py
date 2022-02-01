@@ -3,8 +3,9 @@ import secrets
 import os
 from PIL import Image
 from ds_blog import app, bcrypt, db, login_manager
-from ds_blog.models import(User, TimelineDelta, TimelineEntry, 
-                        Announcements, add_new_td, td_graph_gen)
+from ds_blog.models import(User, TimelineDelta, 
+                        TimelineEntry, Announcements)
+from ds_blog.logic import add_new_td, td_graph_gen
 from ds_blog.forms import LoginForm, RegistrationForm, TimelineEntryForm, AnnouncementsForm, UpdateAccountForm
 from ds_blog.dictionary import bonfire_locations, weapon_dict, armor_dict
 from flask import render_template, url_for, flash, redirect, request
@@ -15,7 +16,12 @@ from json import dumps, loads
 
 from flask_login.utils import login_user, current_user, logout_user, login_required
 
-random_gestures = ['Umbasa', 'Vereror Nox', 'See You, Space Cowboy', 'Easy Come, Easy Go', 'See you, Space Samurai', 'See you, Cowgirl, Someday, Somewhere', "You're gonna carry that weight", "Soul of the mind, key to lifes' ether. Soul of the lost, withdrawn from its vessel. Let strength be granted, so the world might be mended... so the world might be mended.", "Let these souls, withdrawn from their vesels, Manifestations of disparity, Elucidated by fire, Burrow deep within me, Retreating to a darkness beyond the reach of flame, Let them assume a new master, Inhabiting ash, casting themselves upon new forms."]
+random_gestures = ['Umbasa', 'Vereror Nox', 'See You, Space Cowboy', 
+                    'Easy Come, Easy Go', 'See you, Space Samurai', 
+                    'See you, Cowgirl, Someday, Somewhere', "You're gonna carry that weight", 
+                    "Soul of the mind, key to lifes' ether. Soul of the lost, withdrawn from its vessel. Let strength be granted, so the world might be mended... so the world might be mended.", 
+                    "Let these souls, withdrawn from their vesels, Manifestations of disparity, Elucidated by fire, Burrow deep within me, Retreating to a darkness beyond the reach of flame, Let them assume a new master, Inhabiting ash, casting themselves upon new forms."
+                    ]
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -59,7 +65,8 @@ def view_timeline_entry(tl_id):
     entry = TimelineEntry.query.get_or_404(tl_id)
     delta_entry = TimelineDelta.query.filter_by(tl_entry_id=tl_id).first()
     gesture = choice(random_gestures)
-    return render_template('timeline_entry.html', title='Timeline Entry', entry=entry, delta_entry=delta_entry, gesture=gesture)
+    entry_id = str(tl_id)
+    return render_template('timeline_entry.html', title='Timeline Entry', entry=entry, delta_entry=delta_entry, gesture=gesture, entry_id=entry_id)
 
 @login_required
 @app.route('/post-tl', methods=['GET', 'POST'])
