@@ -1,27 +1,19 @@
 from random import choice
-import secrets
-import os
-from PIL import Image
-from ds_blog import app, bcrypt, db, login_manager
-from ds_blog.models import(User, TimelineDelta, 
-                        TimelineEntry, Announcements)
-from ds_blog.logic import add_new_td, td_graph_gen
-from ds_blog.forms import LoginForm, RegistrationForm, TimelineEntryForm, AnnouncementsForm, UpdateAccountForm
-from ds_blog.dictionary import bonfire_locations, weapon_dict, armor_dict
-from flask import render_template, url_for, flash, redirect, request
 
-
-from xmltodict import parse
 from json import dumps, loads
 
+from flask import render_template, url_for, flash, redirect, request
 from flask_login.utils import login_user, current_user, logout_user, login_required
 
-random_gestures = ['Umbasa', 'Vereror Nox', 'See You, Space Cowboy', 
-                    'Easy Come, Easy Go', 'See you, Space Samurai', 
-                    'See you, Cowgirl, Someday, Somewhere', "You're gonna carry that weight", 
-                    "Soul of the mind, key to lifes' ether. Soul of the lost, withdrawn from its vessel. Let strength be granted, so the world might be mended... so the world might be mended.", 
-                    "Let these souls, withdrawn from their vesels, Manifestations of disparity, Elucidated by fire, Burrow deep within me, Retreating to a darkness beyond the reach of flame, Let them assume a new master, Inhabiting ash, casting themselves upon new forms."
-                    ]
+from xmltodict import parse
+
+from ds_blog import app, bcrypt, db, login_manager
+from ds_blog.dictionary import bonfire_locations, weapon_dict, armor_dict, random_gestures
+from ds_blog.forms import(LoginForm, RegistrationForm,
+                        TimelineEntryForm, AnnouncementsForm, UpdateAccountForm)
+from ds_blog.logic import add_new_td, td_graph_gen, save_picture
+from ds_blog.models import(User, TimelineDelta,
+                        TimelineEntry, Announcements)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -30,57 +22,133 @@ def load_user(user_id):
 @app.route('/')
 @app.route('/home')
 def home():
+    """uses flask route() decorator to open the home page.
+    Additionally displays announcements
+
+    Returns
+    -------
+    render_template
+        contains the render_template for 'home.html'
+        and passes through the title of 'Home Page'
+        gestures and announcements.
+    """
     gesture = choice(random_gestures)
     announcements = Announcements.query.all()
-    return render_template('home.html', title='Home Page', gesture=gesture, announcements=announcements)
+    return render_template('home.html',
+                        title='Home Page',
+                        gesture=gesture,
+                        announcements=announcements
+                        )
 
 @app.route('/post-an', methods=['GET', 'POST'])
 @login_required
 def new_post():
+    """uses flask route() decorator to open the new announcements page.
+    AnnouncementsForm is used to validate and provide entry for the new announcement.
+    and then it is published into the DB via SQLA.
+
+    Returns
+    -------
+    render_template
+        contains the render_template
+        for 'post_announcement.html' and passes through
+        the title of New Announcement,
+        AnnouncementsForm() as form gestures.
+        checks announcer boolean on end user
+    """
     form = AnnouncementsForm()
     if form.validate_on_submit():
-        announcement = Announcements(title=form.title.data, content=form.content.data, author=current_user)
+        announcement = Announcements(title=form.title.data,
+                                content=form.content.data,
+                                author=current_user
+                                )
         db.session.add(announcement)
         db.session.commit()
         flash('Your post has been created!', 'success')
         return redirect(url_for('home'))
-    return render_template('post_announcement.html', title='New Annoucement', form=form, legend ='New Announcement', announcer=current_user.announcer)
+    return render_template('post_announcement.html',
+                        title='New Annoucement',
+                        form=form,
+                        legend ='New Announcement',
+                        announcer=current_user.announcer
+                        )
 
 @app.route('/timeline')
 def timeline():
+    """uses flask route() decorator to open the timeline page.
+    using timeline_entry, will display all timeline entries
+    in order of latest to oldest.
+
+    Returns
+    -------
+    render_template
+        contains the render_template
+        for 'timeline.html' and gesture.
+    """
     gesture = choice(random_gestures)
     timeline_entry = TimelineEntry.query.order_by(TimelineEntry.id.desc()).all()
-    return render_template('timeline.html', title='Timeline', gesture=gesture, timeline_entry=timeline_entry)
+    return render_template('timeline.html',
+                        title='Timeline',
+                        gesture=gesture,
+                        timeline_entry=timeline_entry
+                        )
 
 @app.route('/timeline_entry/<int:tl_id>', methods=['GET', 'POST'])
 def view_timeline_entry(tl_id):
-    """[summary]
+    """uses flask route() decorator to generate a timeline entry page.
+    will display all available values of a given entry.
 
-    Args:
-        tl_id ([type]): [description]
+    Parameters
+    ----------
+    tl_id (int)
+        timeline_entry id value.
 
-    Returns:
-        [type]: [description]
+    Returns
+    -------
+    render_template
+        contains the render_template
+        for 'timeline.html' and gesture
     """
     entry = TimelineEntry.query.get_or_404(tl_id)
     delta_entry = TimelineDelta.query.filter_by(tl_entry_id=tl_id).first()
     gesture = choice(random_gestures)
     entry_id = str(tl_id)
-    return render_template('timeline_entry.html', title='Timeline Entry', entry=entry, delta_entry=delta_entry, gesture=gesture, entry_id=entry_id)
+    return render_template('timeline_entry.html',
+                        title='Timeline Entry',
+                        entry=entry,
+                        delta_entry=delta_entry,
+                        gesture=gesture,
+                        entry_id=entry_id)
 
 @login_required
 @app.route('/post-tl', methods=['GET', 'POST'])
 def timeline_entry():
+    """uses flask route() decorator to generate the form
+    to generate timeline entries. requires developer boolean.
+
+    Returns
+    -------
+    render_template
+        contains the render_template
+        for 'post_timeline_entry.html' and passes through gesture,
+        developer boolean and form.
+    """
     form = TimelineEntryForm()
     if form.validate_on_submit():
         character_name = form.character_name.data
-        slash_data = loads(dumps(parse(form.slash_data.data)))
-        pg_data = loads(dumps(parse(form.player_game_data.data)))
-        attrib_data = loads(dumps(parse(form.attributes.data)))
-        charAsm = loads(dumps(parse(form.char_equip.data)))
-        base_stats = loads(dumps(parse(form.base_stats.data)))
+        slash_data = loads(
+            dumps(parse(form.slash_data.data)))
+        pg_data = loads(
+            dumps(parse(form.player_game_data.data)))
+        attrib_data = loads(
+            dumps(parse(form.attributes.data)))
+        charAsm = loads(
+            dumps(parse(form.char_equip.data)))
+        base_stats = loads(
+            dumps(parse(form.base_stats.data)))
 
-        attrib_index = attrib_data.get('CheatTable').get('CheatEntries').get('CheatEntry').get('CheatEntries').get('CheatEntry')
+        attrib_index = attrib_data.get('CheatTable').get(
+            'CheatEntries').get('CheatEntry').get('CheatEntries').get('CheatEntry')
         soul_level = int(attrib_index[0].get('LastState').get('@Value'))
         vitality = int(attrib_index[1].get('LastState').get('@Value'))
         attunement = int(attrib_index[2].get('LastState').get('@Value'))
@@ -142,7 +210,6 @@ def timeline_entry():
             leggings=leggings,
             play_time=play_time
         )
-        #before I commit timeline_entry, I need to perform timeline_delta's entry so that first() pulls the latest entry from the db. THEN perform tiemline entry's new entry.
         db.session.add(timeline_entry)
         db.session.commit()
         latest = TimelineEntry.query.filter_by(character_name=character_name).order_by(TimelineEntry.id.desc()).first()
@@ -151,21 +218,12 @@ def timeline_entry():
         flash('Timeline Entry has been created!', 'success')
         return redirect(url_for('timeline'))
     gesture = choice(random_gestures)
-    return render_template('post_timeline_entry.html', form=form, gesture=gesture, developer=current_user.developer)
+    return render_template('post_timeline_entry.html',
+                        form=form,
+                        gesture=gesture,
+                        developer=current_user.developer
+                        )
 
-
-def save_picture(form_picture):
-    random_hex = secrets.token_hex(8)
-    _, f_ext = os.path.splitext(form_picture.filename)
-    picture_fn = random_hex + f_ext
-    picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
-
-    output_size = (125, 125)
-    i = Image.open(form_picture)
-    i.thumbnail(output_size)
-    i.save(picture_path)
-
-    return picture_fn
 
 
 @app.route("/account", methods=['GET', 'POST'])
@@ -185,12 +243,11 @@ def account():
         form.username.data = current_user.username
         form.email.data = current_user.email
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
-    return render_template('account.html', title='Account',
-                           image_file=image_file, form=form)
-
-
-
-
+    return render_template('account.html',
+                        title='Account',
+                        image_file=image_file,
+                        form=form
+                        )
 
 @app.route('/about')
 def about():
@@ -208,7 +265,10 @@ def login():
             return redirect(next_page) if next_page else redirect(url_for('home'))
         else:
             flash('Login Unsuccessful. Please check email and password', 'danger')
-    return render_template('login.html', title='Login', form=form)
+    return render_template('login.html',
+                        title='Login',
+                        form=form
+                        )
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -220,7 +280,10 @@ def register():
         db.session.commit()
         flash(f'Your account has been created! you are able to log in', 'success')
         return redirect(url_for('home'))
-    return render_template('register.html', title='Register', form=form)
+    return render_template('register.html',
+                        title='Register',
+                        form=form
+                        )
 
 @app.route("/logout")
 def logout():

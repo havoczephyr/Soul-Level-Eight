@@ -1670,6 +1670,8 @@ armor_dict = {
     }
 
 weapon_dict = {
+
+
     "000DBBA0":"Nothing",
     "000186A0":"Dagger",
     "000186A1":"Dagger+1",
@@ -11349,3 +11351,9 @@ weapon_dict = {
     "00896321":"Fire Black Iron Grtshld.+9",
     "00896322":"Fire Black Iron Grtshld.+10"
         }
+
+random_gestures = ['Umbasa', 'Vereror Nox', 'See You, Space Cowboy', 
+                    'Easy Come, Easy Go', 'See you, Space Samurai', 
+                    'See you, Cowgirl, Someday, Somewhere', "You're gonna carry that weight", 
+                    "Soul of the mind, key to lifes' ether. Soul of the lost, withdrawn from its vessel. Let strength be granted, so the world might be mended... so the world might be mended.", 
+                    "Let these souls, withdrawn from their vesels, Manifestations of disparity, Elucidated by fire, Burrow deep within me, Retreating to a darkness beyond the reach of flame, Let them assume a new master, Inhabiting ash, casting themselves upon new forms."]

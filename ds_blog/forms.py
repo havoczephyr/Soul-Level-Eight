@@ -1,12 +1,12 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed
-
 from flask_login import current_user
+from wtforms import StringField, BooleanField, FileField, PasswordField, SubmitField, TextAreaField
+from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
 
 from ds_blog.models import User
 
-from wtforms import StringField, BooleanField, FileField, PasswordField, SubmitField, TextAreaField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
+
 
 class TimelineEntryForm(FlaskForm):
     character_name = StringField('Character Name', validators=[DataRequired()])

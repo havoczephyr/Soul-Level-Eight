@@ -1,6 +1,10 @@
-import matplotlib.pyplot as plt
+import os
+import secrets
 
-from ds_blog import db
+import matplotlib.pyplot as plt
+from PIL import Image
+
+from ds_blog import db, app
 from ds_blog.models import TimelineEntry, TimelineDelta
 
 def td_graph_gen(character_name, id):
@@ -60,3 +64,30 @@ def add_new_td(character_name, total_deaths, soul_level, play_time):
     )
     db.session.add(timeline_delta)
     db.session.commit()
+
+def save_picture(form_picture):
+    """saves profile pictures into server storage
+    and converts the name into a unique hex value.
+
+    Parameters
+    ----------
+    form_picture : string
+        form_picture is the string value of the picture
+        passed through by account()
+
+    Returns
+    -------
+    [type]
+        [description]
+    """
+    random_hex = secrets.token_hex(8)
+    _, f_ext = os.path.splitext(form_picture.filename)
+    picture_fn = random_hex + f_ext
+    picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
+
+    output_size = (125, 125)
+    i = Image.open(form_picture)
+    i.thumbnail(output_size)
+    i.save(picture_path)
+
+    return picture_fn
