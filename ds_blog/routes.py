@@ -1,3 +1,5 @@
+"""contains the endpoints for ds_blog
+"""
 from random import choice
 
 from json import dumps, loads
@@ -17,6 +19,19 @@ from ds_blog.models import(User, TimelineDelta,
 
 @login_manager.user_loader
 def load_user(user_id):
+    """loads up user values for
+    authentication and validation.
+
+    Parameters
+    ----------
+    user_id : int
+        id of the user.
+
+    Returns
+    -------
+    User.query.get()
+        fetches user data from db.
+    """
     return User.query.get(int(user_id))
 
 @app.route('/')
@@ -229,6 +244,16 @@ def timeline_entry():
 @app.route("/account", methods=['GET', 'POST'])
 @login_required
 def account():
+    """uses flask route() decorator to generate the form
+    to edit account information.
+
+    Returns
+    -------
+    render_template
+        contains the render_template
+        for 'account.html' and passes through gesture,
+        image_file and form.
+    """
     form = UpdateAccountForm()
     if form.validate_on_submit():
         if form.picture.data:
@@ -243,14 +268,25 @@ def account():
         form.username.data = current_user.username
         form.email.data = current_user.email
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
+    gesture = choice(random_gestures)
     return render_template('account.html',
                         title='Account',
                         image_file=image_file,
-                        form=form
+                        form=form,
+                        gesture=gesture
                         )
 
 @app.route('/about')
 def about():
+    """uses flask route() decorator
+    to generate the about page.
+
+    Returns
+    -------
+    render_template
+        contains the render_template
+        for 'about.html' and passes through gesture.
+    """
     gesture = choice(random_gestures)
     return render_template('about.html', title='About')
 
@@ -272,6 +308,16 @@ def login():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    """uses flask route() decorator
+    to generate the about page.
+
+    Returns
+    -------
+    render_template
+        contains the render_template
+        for 'register.html' and passes through gesture
+        and form.
+    """
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
@@ -287,5 +333,14 @@ def register():
 
 @app.route("/logout")
 def logout():
+    """uses flask route() decorator
+    to generate the home page immediately after
+    logging out the user.
+
+    Returns
+    -------
+    redirect
+        redirects the user to home()
+    """
     logout_user()
     return redirect(url_for('home'))

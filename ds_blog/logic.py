@@ -8,6 +8,16 @@ from ds_blog import db, app
 from ds_blog.models import TimelineEntry, TimelineDelta
 
 def td_graph_gen(character_name, id):
+    """function used by timelineEntry to generate
+    matplotlib "total death" graphs.
+
+    Parameters
+    ----------
+    character_name : string
+        name of the character passed through by timelineEntry.
+    id : int
+        id of the character passed through by timelineEntry.
+    """
     td_plot = []
     entry = TimelineEntry.query.filter_by(character_name=character_name)
     entry_len = 0
